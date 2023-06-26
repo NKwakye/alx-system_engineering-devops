@@ -1,40 +1,29 @@
-# To install & configure nginx on a server using Puppet
+# Script that setup a nginx web server on our server + redirection.
 
-$config = "server {
-	listen 80 default_server;
-        listen [::]:80 default_server;
-
-        root /var/www/html;
-        index index.html;
-
-        location /redirect_me {
-                return 301 https://www.youtube.com/watch?v=QH2-TGUlwu4;
-        }
-}"
-
-package { 'nginx':  # Installs an Nginx server
-ensure	=> 'installed',
+package { 'nginx':
+  ensure   => present,
+  provider => 'apt'
 }
 
-file { 'index.html':
-ensure	=> 'present',
-path	=> '/var/www/html/index.html',
-content	=> 'Hello World!',
-mode	=> '0644'
+# Index page
+file { '/var/www/html/index.html':
+  ensure  => present,
+  path    => '/var/www/html/index.html',
+  content => 'Holberton School'
 }
 
-file { 'server_config':
-ensure	=> 'present',
-path 	=> '/etc/nginx/sites-available/default',
-content => $config
+# Redirect to fabulous Rick Astley page
+file_line { 'Rick Astley showtime':
+  ensure => 'present',
+  path   => '/etc/nginx/sites-available/default',
+  after  => 'listen 80 default_server;',
+  line   => '        rewrite ^/redirect_me https://www.youtube.com/watch?v=dQw4w9WgXcQ permanent;'
 }
 
-exec { 'service nginx restart':
-path	=> ['/usr/sbin', '/usr/bin']
+service { 'nginx':
+  ensure     => running,
+  enable     => true,
+  hasrestart => true,
+  require    => Package['nginx'],
+  subscribe  => File_line['Rick Astley showtime']
 }
-
-# OR
-# exec {'install':
-#   provider => shell,
-#   command  => 'sudo apt-get -y update ; sudo apt-get -y install nginx ; echo "Hello World!" | sudo tee /var/www/html/index.nginx-debian.html ; sudo sed -i "s/server_name _;/server_name _;\n\trewrite ^\/redirect_me https:\/\/github.com\/Dikachis permanent;/" /etc/nginx/sites-available/default ; sudo service nginx start',
-# }
