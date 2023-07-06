@@ -41,5 +41,5 @@ backend web-backend
 frontend proxynode
         bind *:80
 	mode http
-        bind *:443 ssl crt /etc/letsencrypt/live/www.dikalite.tech/fullchain.pem
+        bind *:443 ssl crt /etc/letsencrypt/live/www.myschool.tech/fullchain.pem
         default_backend web-backend
